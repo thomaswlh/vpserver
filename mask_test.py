@@ -1,6 +1,6 @@
 from ultralytics import YOLO
-# from lama_cleaner.model_manager import ModelManager
-# from lama_cleaner.schema import Config
+from lama_cleaner.model_manager import ModelManager
+from lama_cleaner.schema import Config
 import numpy as np
 import torch, cv2
 
@@ -8,7 +8,7 @@ import torch, cv2
 print(f"CUDA available: {torch.cuda.is_available()}")
 
 seg_model = YOLO("yolo11n-seg.pt")
-# lama_model = ModelManager(name="lama", device="cuda" if torch.cuda.is_available() else "cpu")  
+lama_model = ModelManager(name="lama", device="cuda" if torch.cuda.is_available() else "cpu")  
 
 def combine_masks(mask_list):
     """
@@ -103,7 +103,7 @@ def lama_remove_people(orginal_image_path_list, mask_list):
         original_image = cv2.imread(image_path)
 
         # Remove people using the mask
-        result = lama_model.remove(original_image, mask)
+        # result = lama_model.remove(original_image, mask)
         results.append(result)
 
     return results
