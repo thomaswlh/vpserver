@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant U as User
+    participant LLM as LLM
+    participant MCPS as MCP Server and Tools
+    participant PY as Python Program
+
+    U ->> LLM: Enter outfit discription text
+    LLM ->> MCPS: Get one frame of video along with the discription
+    MCPS ->> PY: Get one frame of video
+    PY ->> MCPS: Send one frame of video
+    MCPS ->> LLM: Send video frame
+    LLM ->> MCPS: Crop the discripted person from the frame according to discription
+    MCPS ->> PY: Crop image
+    PY ->> MCPS: Send cropped image
+    MCPS ->> LLM: Send cropped image
+    LLM ->> MCPS: Generate dataset
+    MCPS ->> PY: Generate dataset
+    PY ->> MCPS: Reprot generation success
+    MCPS ->> LLM: Report dataset generation success
+    LLM ->> MCPS: Start train model
+    MCPS ->> PY: Start train model
+    PY ->> MCPS: Report training result success
+    MCPS ->> LLM: Report training result success
+    LLM ->> MCPS: Start mask generation
+    MCPS ->> PY: Start mask generation
+    PY ->> MCPS: Report mask generation success
+    MCPS ->> LLM: Report mask generation success
+    LLM ->> MCPS: Start video person removal
+    MCPS ->> PY: Start video person removal
+    PY ->> MCPS: Report video person removal success
+    PY ->> LLM: Report video person removal success
+    LLM ->> MCPS: Send video with person removed
+    MCPS ->> PY: Send video with person removed
+    PY ->> MCPS: Report video with person removed success
+    MCPS ->> LLM: Report send video with person removed success
