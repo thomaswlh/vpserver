@@ -3,8 +3,6 @@ from utils import *
 from processing import *
 
 def main():
-    image_path = './media/DJI_20250504171801_0005_V.JPG'
-    output_mask_path = './media/DJI_20250504171801_0005_V_MASK.JPG'
 
     # Load model
     model = load_segmentation_model('yolo11n-seg.pt')
@@ -13,33 +11,42 @@ def main():
         return
 
     # Read image
-    frame = cv2.imread(image_path)
-    if frame is None:
-        print(f"Failed to read image: {image_path}")
-        return
+    images_path = ["./media/peoplde.jpeg", "./media/bfs.jpg"]
+    images = read_images(images_path)
+    for idx, image in enumerate(images):
+        if image is None:
+            print(f"Failed to read image: {images_path[idx]}")
 
     # Process segmentation
-    result_masks = process_segmentation(
+    result_masks, output_mask_paths = process_segmentation(
         model=model,
-        image_path=image_path,
-        output_mask_path=None,
+        images_list=images,
+        images_path_list=images_path,
+        output_mask_path="./media/masks",
         device="cuda:0",
-        output_mask=False,
-        show_mask=False
+        output_mask=True,
+        show_mask=True
     )
 
     # Select ROI (optional, comment out if not needed)
-    pt1, pt2 = select_roi_points(result_masks[0])
-    print(f"Selected ROI: {pt1}, {pt2}")
 
-    processed_mask = mask_out_rectangle(result_masks[0], pt1, pt2)
+    for idx, mask in enumerate(result_masks):
+        # Error handling: Check if output_mask_paths has enough elements
+        if output_mask_paths is None or idx >= len(output_mask_paths):
+            print(f"Error: No output path for mask at index {idx}. Skipping save.")
+            continue
 
-    cv2.imwrite(output_mask_path, processed_mask)
-
-    if result_masks is not None and result_masks[0] is not None:
-        print("Segmentation and mask saving successful.")
-    else:
-        print("Segmentation failed.")
+        pt1, pt2 = select_roi_points(mask, window_name="Select ROI")
+        print(f"Selected ROI: {pt1}, {pt2}")
+        processed_mask = mask_out_rectangle(mask, pt1, pt2)
+        if processed_mask is not None:
+            success = cv2.imwrite(output_mask_paths[idx], processed_mask)
+            if success:
+                print(f"Segmentation and mask saving for {output_mask_paths[idx]} successful.")
+            else:
+                print(f"Failed to save processed mask to {output_mask_paths[idx]}.")
+        else:
+            print(f"Segmentation for {output_mask_paths[idx]} failed.")
 
 if __name__ == "__main__":
     main()

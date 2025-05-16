@@ -55,10 +55,10 @@ def select_roi_points(frame, window_name="Select ROI"):
     """
     if frame is None:
         print("Error: Input frame is None.")
-        return None
+        return None, None
     if not hasattr(cv2, "selectROI"):
         print("Error: cv2.selectROI is not available in your OpenCV installation.")
-        return None
+        return None, None
     try:
         while True:
             roi = cv2.selectROI(window_name, frame, showCrosshair=True, fromCenter=False)
@@ -72,7 +72,7 @@ def select_roi_points(frame, window_name="Select ROI"):
             return (x1, y1), (x2, y2)
     except Exception as e:
         print(f"Error during ROI selection: {e}")
-        return None
+        return None, None
 
 def mask_out_rectangle(mask, pt1, pt2):
     """
