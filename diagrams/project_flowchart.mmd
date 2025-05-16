@@ -1,0 +1,36 @@
+%%{init: {"theme": "neutral"}}%%
+%%影片雜人去除服務
+flowchart TD
+    AA@{label: "環境及模型初始化"}
+    A@{label: "影片輸入", shape: "in-out"}
+    B@{label: "把影片分拆成相片和音軌"}
+    B1@{label: "相片"}
+    B2@{label: "音軌"}
+    C@{label: "最後一張相片？", shape: "decision"}
+    D@{label: "讀入一張相片"}
+    E@{label: "定位主角人物位置"}
+    F@{label: "定位出其他要去除的人"}
+    G@{label: "調用消除模型消除人"}
+    SCS@{label: "成功？", shape: "decision"}
+    PIC_ERR@{label: "記錄相片處理錯誤"}
+    H@{label: "儲存己處理相片"}
+    I@{label: "收集所有己處理的相片"}
+    J@{label: "從相片合成影片(無聲)"}
+    S@{label: "合併音軌"}
+    ENC@{label: "編碼&輸出"}
+    CLN@{label: "結束&清理文件"}
+
+    AA --> A
+    A --> B
+    B --> B1
+    B1 --> C
+    B --> B2 ----> J
+    C -- No --> D
+    C --> |Yes| I --> J --> S --> ENC --> CLN
+    D --> E
+    E --> F
+    F --> G
+    G ---> SCS
+    SCS --> |Yes| H --> C
+    SCS --> |No| PIC_ERR --> C
+

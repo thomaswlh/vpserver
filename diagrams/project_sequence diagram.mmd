@@ -1,0 +1,87 @@
+%%{init: {"theme": "neutral"}}%%
+sequenceDiagram
+    actor EP as External Program
+    participant MN as main.py
+    participant U as utils.py
+    participant P as processing.py
+    participant S as Storage
+
+    MN ->> MN: 庫和模型初始化
+    EP ->> MN: 提交任務
+    S ->> MN: 影片讀取
+    par 影像分拆
+        MN ->> U: 影像分拆: frames_from_video()
+        U ->> MN: 返回相片
+    and 音軌分拆
+        MN ->> U: 音軌分拆: audio_from_video()
+        U ->> MN: 返回音頻
+    end
+
+    MN ->> S: 儲存相片和音頻
+    MN ->> U: 提取客戶相片: extract_customer_photo()
+    U ->> MN: 返回客戶相片
+    MN ->> U: 從客戶相片中提出個照: person_photo_from_customer_photo()
+    U ->> MN: 返回客戶個人相片
+    Note right of U: 可以每5秒取一張相
+    MN ->> U: 用資料增強從個人照生成資料集: dataset_from_individuals_photo()
+    U ->> MN: 返回資料集
+    MN ->> U: 拆分訓練和測試集: dataset_train_test_split()
+
+    par 訓練客戶辦識模型
+        MN ->> P: 訓練客戶辦識模型: train_customer_recognition_model()
+        P ->> MN: 返回模型
+        MN ->> P: 測客戶辦識模型: test_customer_recognition_model()
+        P ->> MN: 返回模型測試資訊
+    and 目標分割
+        loop 逐一讀入所有照片
+            MN ->> P: 對圖中的人進行目標分割(object segmentation): people_segmentation_from_image()
+            P ->> MN: 返回目標分割資訊
+            MN ->> S: 目標分割資訊寫入JSON: write_segmentation_info_json()
+        end
+    end
+
+    loop 人物識別
+        S ->> MN: 讀取一張相片
+        S ->> MN: 讀取分割資訊
+        MN ->> U: 提取所有人照片: extract_persons_from_json()
+        loop 根據分割資訊用客戶模型判定雜人
+            S ->> MN: 讀取一人相片
+            MN ->> P: 識別客戶人物
+            alt 是客戶人物
+                P ->> MN: 返回true
+            else 不是客戶人物
+                P ->> MN: 返回false
+            end
+        end
+    end
+
+    loop 人物去除
+        loop 讀取一張相片
+            loop 讀取判定資訊:
+                MN ->> MN: 讀取一人判定資訊
+                alt 是客戶
+                    MN ->> MN: pass
+                else 不是客戶
+                    MN ->> P: 人物去除: remove_person_with_info()
+                end
+            end
+        end
+       MN ->> S: 儲存相片
+    end
+
+    MN ->> U: 合成影片（無聲）
+    U ->> S: 儲存影片（無聲）
+    S ->> MN: 讀取影片（無聲）
+    MN ->> U: 合成音軌至影片(編碼&輸出)
+    U ->> S: 儲存影片
+
+
+
+
+
+
+
+
+
+
+
