@@ -1,6 +1,8 @@
 import cv2
 from ultralytics import YOLO
 import torch
+from matplotlib.widgets import RectangleSelector
+import matplotlib.pyplot as plt
 
 def read_images(image_paths):
     """
@@ -72,6 +74,47 @@ def select_roi_points(frame, window_name="Select ROI"):
             return (x1, y1), (x2, y2)
     except Exception as e:
         print(f"Error during ROI selection: {e}")
+        return None, None
+
+def select_roi_points_matplotlib(frame, window_name="Select ROI"):
+    """
+    Allows the user to select a ROI on the given frame using matplotlib's RectangleSelector.
+    Returns:
+        tuple: ((x1, y1), (x2, y2)) of the selected ROI, or (None, None) if selection is invalid.
+    """
+    if frame is None:
+        print("Error: Input frame is None.")
+        return None, None
+
+    roi = {}
+
+    def onselect(eclick, erelease):
+        x1, y1 = int(eclick.xdata), int(eclick.ydata)
+        x2, y2 = int(erelease.xdata), int(erelease.ydata)
+        roi['pt1'] = (min(x1, x2), min(y1, y2))
+        roi['pt2'] = (max(x1, x2), max(y1, y2))
+        plt.close()
+
+    fig, ax = plt.subplots()
+    ax.imshow(frame[..., ::-1])  # Convert BGR (OpenCV) to RGB (matplotlib)
+    ax.set_title(window_name)
+    rect_selector = RectangleSelector(
+        ax, onselect,
+        useblit=True,
+        button=[1], minspanx=5, minspany=5, spancoords='pixels',
+        interactive=True
+    )
+    plt.show()
+
+    if 'pt1' in roi and 'pt2' in roi:
+        x1, y1 = roi['pt1']
+        x2, y2 = roi['pt2']
+        if x1 == x2 or y1 == y2:
+            print("Invalid ROI selected (zero width or height).")
+            return None, None
+        return (x1, y1), (x2, y2)
+    else:
+        print("ROI selection cancelled or invalid.")
         return None, None
 
 def mask_out_rectangle(mask, pt1, pt2):

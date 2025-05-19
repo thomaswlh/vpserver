@@ -11,7 +11,7 @@ def main():
         return
 
     # Read image
-    images_path = ["./media/peoplde.jpeg", "./media/bfs.jpg"]
+    images_path = ["/Users/thomaswu/Downloads/5月4日16：06 闲人/DJI_20250504160641_0002_V_航点6.jpg"]
     images = read_images(images_path)
     for idx, image in enumerate(images):
         if image is None:
@@ -23,9 +23,9 @@ def main():
         images_list=images,
         images_path_list=images_path,
         output_mask_path="./media/masks",
-        device="cuda:0",
-        output_mask=True,
-        show_mask=True
+        device="cpu",
+        output_mask=True,  # <-- Change this to True
+        show_mask=False
     )
 
     # Select ROI (optional, comment out if not needed)
@@ -36,7 +36,7 @@ def main():
             print(f"Error: No output path for mask at index {idx}. Skipping save.")
             continue
 
-        pt1, pt2 = select_roi_points(mask, window_name="Select ROI")
+        pt1, pt2 = select_roi_points_matplotlib(mask, window_name="Select ROI")
         print(f"Selected ROI: {pt1}, {pt2}")
         processed_mask = mask_out_rectangle(mask, pt1, pt2)
         if processed_mask is not None:

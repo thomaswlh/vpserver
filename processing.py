@@ -2,7 +2,7 @@ import cv2, os
 import numpy as np
 
 
-def process_segmentation(model, images_list, images_path_list, output_mask_path=None, device="cuda:0", classes=[0], output_mask=False, show_mask=False):
+def process_segmentation(model, images_list, images_path_list, output_mask_path=None, device="cuda:0", classes=[0], output_mask=False, show_mask=False, show_detetion=False):
     """
     Runs segmentation on a list of images and saves/displays the combined masks.
 
@@ -15,6 +15,7 @@ def process_segmentation(model, images_list, images_path_list, output_mask_path=
         classes (list): List of class IDs to segment.
         output_mask (bool): Whether to save the mask to a file.
         show_mask (bool): Whether to display the mask using OpenCV.
+        show_detetion (bool): Whether to display the detection results.
 
     Returns:
         list: List of combined masks as NumPy arrays, or None if failed.
@@ -29,7 +30,7 @@ def process_segmentation(model, images_list, images_path_list, output_mask_path=
             result_masks.append(None)
             continue
         try:
-            results = model(source=image, device=device, classes=classes, retina_masks=True)
+            results = model(source=image, device=device, classes=classes, retina_masks=True, save=True)
         except Exception as e:
             print(f"Error running model inference on image {idx}: {e}")
             result_masks.append(None)

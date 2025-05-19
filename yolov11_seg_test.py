@@ -3,7 +3,7 @@ import numpy as np
 from ultralytics import YOLO
 
 # Load the YOLOv11-seg model (replace with the correct path/model name if needed)
-model = YOLO('./weights/olo11n-seg.pt')
+model = YOLO('./weights/yolo11n-seg.pt')
 
 # Ensure CUDA is available and use GPU
 if torch.cuda.is_available():
@@ -12,7 +12,7 @@ else:
     print("CUDA is not available. The model will run on CPU.")
 
 # Run segmentation inference on an image
-results = model(source='./media/DJI_20250504171801_0005_V.JPG',device="cuda:0",classes=[0], retina_masks=True) # Replace 'input.jpg' with your image path
+results = model(source='/Users/thomaswu/Downloads/5月4日16：06 闲人/DJI_20250504160641_0002_V_航点6.jpg',device="cpu",classes=[0], retina_masks=True, conf=0.3) # Replace 'input.jpg' with your image path
 
 result_masks = []
 masks = []
